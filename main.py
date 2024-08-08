@@ -35,9 +35,9 @@ def read_file_as_dataframe(file_path: str) -> pd.DataFrame:
 
   return df
 
-def clean_data(raw_data: pd.DataFrame, columns_demo: str, columns_resp: str) -> pd.DataFrame:
+def select_columns(raw_data: pd.DataFrame, columns_demo: str, columns_resp: str) -> pd.DataFrame:
   """
-  Select relevant columns from the downloaded survey data
+  Select relevant columns from the downloaded survey data using the returned dataframe from the read_file_as_dataframe function
   
   Parameters:
     raw_data (pd.DataFrame): The raw dataset returned from the read_file_as_dataframe function
@@ -65,10 +65,10 @@ def clean_data(raw_data: pd.DataFrame, columns_demo: str, columns_resp: str) -> 
 
 def kitchen_sink_prompt(df: pd.DataFrame, columns_demo: str, columns_resp: str, question_text: list) -> pd.DataFrame:
   """
-  Create prompts for asking substantive questions to LLMs
+  Create prompts for asking substantive questions to LLMs using the returned dataframe from either afrobarometer_second_person_base or afrobarometer_third_person_base
 
   Parameters:
-    df (pd.DataFrame): The cleaned survey data returned from a custom cleaning function (e.g. afro_custom_first, afro_custom_third)
+    df (pd.DataFrame): The cleaned survey data returned from a custom cleaning function (e.g. afrobarometer_second_person_base, afrobarometer_third_person_base)
     columns_demo (str): The names of selected columns for demographics in a single string divided by comma (e.g. "Q1, Q100, Q101, Q2, Q94, Q95, Q84A, Q93A, Q93B")
     columns_resp (str): The names of selected columns for substantives in a single string divided by comma
     question_text (list): The list of substantive questions; required to have the same number of items as columns included in columns_resp and in the same order
@@ -118,13 +118,14 @@ def kitchen_sink_prompt(df: pd.DataFrame, columns_demo: str, columns_resp: str, 
 
   return df
 
-# create custom fuction for Afrobarometer
-def afro_custom_first(df: pd.DataFrame) -> pd.DataFrame:
+def afrobarometer_second_person_base(df: pd.DataFrame) -> pd.DataFrame:
   """
-  Clean afrobarometer data (Ghana wave 9) for second-person ("You are") prompts
+  Reorganise demographic variables from the afrobarometer data (Ghana round 9) and create the base for second-person ("You are") prompts using the dataframe returned from select_columns
+  Since some demographic variables that would be useful when creating prompts (e.g. employment status, etc) are not organised in such a way as to allow direct pasting when creating prompts, this function re-organises these variables prior to generating prompts
+  Reorganised variables are: employment; electricity; mobile phone; health clinic; party support; voting intention
 
   Paramters:
-    df (pd.DataFrame): The cleaned survey data returned from clean_data
+    df (pd.DataFrame): The survey data with selected variables returned from select_columns
 
   Returns:
     pd.DataFrame: The survey data prepared for prompt creation (goes to kitchen_sink_prompt)
@@ -223,12 +224,13 @@ def afro_custom_first(df: pd.DataFrame) -> pd.DataFrame:
 
   return df
 
-def afro_custom_third(df: pd.DataFrame) -> pd.DataFrame:
+def afrobarometer_third_person_base(df: pd.DataFrame) -> pd.DataFrame:
   """
-  Clean afrobarometer data (Ghana wave 9) for third-person (e.g. "She is") prompts
-
+  Reorganise demographic variables from the afrobarometer data (Ghana round 9) and create the base for third-person ("She is") prompts using the dataframe returned from select_columns
+  Since some demographic variables that would be useful when creating prompts (e.g. employment status, etc) are not organised in such a way as to allow direct pasting when creating prompts, this function re-organises these variables prior to generating prompts
+  Reorganised variables are: employment; electricity; mobile phone; health clinic; party support; voting intention
   Paramters:
-    df (pd.DataFrame): The cleaned survey data returned from clean_data
+    df (pd.DataFrame): The survey data with selected variables returned from select_columns
 
   Returns:
     pd.DataFrame: The survey data prepared for prompt creation (goes to kitchen_sink_prompt)
@@ -332,7 +334,7 @@ def afro_custom_third(df: pd.DataFrame) -> pd.DataFrame:
 
   return df
 
-# selected variables for Ghana wave 9 Afrobarometer survey
+# selected variables for Ghana round 9 Afrobarometer survey
 columns_demo = "RESPNO, URBRUR, REGION, Q1, Q100, Q101, Q2, Q94, Q95, Q84A, Q93A, Q93B, EA_SVC_A, EA_SVC_B, EA_SVC_C, EA_SVC_D, EA_FAC_D, Q91A, Q92A, Q90F, Q90G, Q4B, Q89A, Q89B, Q96, Q4A, Q8"
 columns_resp = "Q6C, Q41A, Q41B, Q41C, Q41D, Q41G, Q45PT1, Q57A, Q57B, Q58A, Q58B, Q58C, Q59, Q7A, Q7B, Q9A, Q9B, Q9C, Q11B, Q11C, Q11D, Q11E, Q31, Q33D, Q33E, Q33I, Q83C_GHA, Q86A, Q86B, Q86C, Q86D, Q86E, Q86F, Q90I"
 question_text = ["Over the past year, how often, if ever, have you or anyone in your family gone without medicines or medical treatment?",
@@ -374,7 +376,7 @@ question_text = ["Over the past year, how often, if ever, have you or anyone in 
 def synthetic_interview(df: pd.DataFrame, synthetic_questions) -> pd.DataFrame:
   """
   Create a survey dataset for synthetic interview approach;
-  Included questions are: Q1, Q100, Q101, Q94, Q8, Q4A, Q9A, Q6C, Q41A, Q41B, Q41C, Q41D from Ghana wave 9 of the Afrobarometer survey
+  Included questions are: Q1, Q100, Q101, Q94, Q8, Q4A, Q9A, Q6C, Q41A, Q41B, Q41C, Q41D from Ghana round 9 of the Afrobarometer survey
 
   Parameters:
     df (pd.DataFrame): The cleaned survey data returned from the kitchen_sink_prompt function
