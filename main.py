@@ -373,7 +373,7 @@ question_text = ["Over the past year, how often, if ever, have you or anyone in 
                  "How much do you trust people from other ethnic groups?",
                  "How often do you use the Internet?"]
 
-def synthetic_interview(df: pd.DataFrame, synthetic_questions) -> pd.DataFrame:
+def synthetic_interview(df: pd.DataFrame) -> pd.DataFrame:
   """
   Create a survey dataset for synthetic interview approach;
   Included questions are: Q1, Q100, Q101, Q94, Q8, Q4A, Q9A, Q6C, Q41A, Q41B, Q41C, Q41D from Ghana round 9 of the Afrobarometer survey
